@@ -1,299 +1,481 @@
 <!doctype html>
 <html lang="pt-br">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Benchmarks globais — Ágil vs Tradicional (DORA)</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-<style>
-  :root {
-    /* Controle de escala de fontes e altura de gráfico */
-    --scale-base: 1.15;          /* aumente para 1.25 ou 1.35 se quiser ainda maior */
-    --chart-h: 180px;            /* altura do gráfico; pode trocar para 200px ou 220px */
-    --bg: #0f172a; --panel: #111827; --muted: #94a3b8; --text: #e5e7eb;
-    --accent: #22c55e; --accent-2: #38bdf8; --warn: #f59e0b;
-    --card: #0b1220; --border: #1f2937; --shadow: 0 8px 16px rgba(0,0,0,.18);
-  }
-  [data-theme="light"]{
-    --bg: #f8fafc; --panel: #ffffff; --muted: #475569; --text: #0f172a;
-    --accent: #16a34a; --accent-2: #0284c7; --warn: #a16207; --card: #ffffff; --border: #e5e7eb;
-  }
-  * { box-sizing: border-box; }
-  html { font-size: calc(16px * var(--scale-base)); }
-  body {
-    margin: 0; font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial;
-    background: var(--bg); color: var(--text);
-  }
-  header {
-    position: sticky; top: 0; z-index: 20;
-    background: rgba(2,6,23,.6); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border);
-  }
-  header .inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; max-width: 1100px; margin: 0 auto; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 56px; }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.05rem; }
-  .brand .dot { width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(45deg, var(--accent), var(--accent-2)); }
-  .actions { display: flex; gap: 10px; }
-  button {
-    appearance: none; border: 1px solid var(--border); color: var(--text); background: var(--panel);
-    padding: 10px 14px; border-radius: 12px; cursor: pointer; transition: .2s ease; box-shadow: var(--shadow);
-    font-size: 0.95rem; font-weight: 600;
-  }
-  button:hover { transform: translateY(-1px); }
-  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); }
-  .hero h1 { margin: 0 0 8px; font-size: 1.5rem; }
-  .hero p { margin: 0; color: var(--muted); font-size: 1rem; }
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(12, 1fr); }
-  .col-12 { grid-column: span 12; }
-  .col-6 { grid-column: span 6; }
-  @media (max-width: 900px){ .col-6 { grid-column: span 12; } }
-
-  .legend { display: inline-flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border);
-    padding: 6px 10px; border-radius: 999px; font-size: 0.9rem; color: var(--muted); }
-  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); font-size: 0.95rem; }
-  .dotA, .dotT { width: 12px; height: 12px; border-radius: 50%; }
-  .dotA { background: var(--accent-2); }
-  .dotT { background: var(--warn); }
-
-  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  @media (max-width: 900px){ .kpis { grid-template-columns: repeat(2, 1fr); } }
-  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px; }
-  .kpi h4 { margin: 0 0 6px; font-size: 0.95rem; color: var(--muted); font-weight: 700; }
-  .kpi .value { font-size: 1.3rem; font-weight: 800; display: flex; gap: 8px; flex-wrap: wrap; }
-  .kpi small { color: var(--muted); font-size: 0.9rem; }
-
-  .note { font-size: 0.95rem; color: var(--muted); }
-  .section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .section-title h2 { margin: 0; font-size: 1.15rem; }
-
-  /* Gráfico com altura fixa e fontes maiores */
-  .chart-wrap { height: var(--chart-h); width: 100%; }
-  .chart-wrap canvas { width: 100% !important; height: 100% !important; display: block; }
-
-  footer { margin-top: 26px; color: var(--muted); font-size: 0.95rem; }
-</style>
-</head>
-<body data-theme="dark">
-  <header>
-    <div class="inner">
-      <div class="brand">
-        <div class="dot"></div>
-        <div>Comparações globais — Ágil vs Tradicional</div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard: Tradicional vs. Ágil (Indicadores DORA)</title>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #1e293b;
+        --card: #0f172a;
+        --border: #334155;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent-agil: #22c55e;
+        --accent-trad: #f97316;
+        --accent-info: #38bdf8;
+        --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+      }
+      [data-theme="light"] {
+        --bg: #f1f5f9;
+        --panel: #ffffff;
+        --card: #f8fafc;
+        --border: #e2e8f0;
+        --text: #1e293b;
+        --muted: #475569;
+        --accent-agil: #16a34a;
+        --accent-trad: #ea580c;
+        --accent-info: #0284c7;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 16px;
+      }
+      .container { max-width: 1280px; margin: 0 auto; padding: 24px 16px 64px; }
+      header {
+        position: sticky; top: 0; z-index: 10;
+        background: color-mix(in srgb, var(--bg) 80%, transparent);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--border);
+      }
+      header .inner {
+        display: flex; align-items: center; justify-content: space-between;
+        max-width: 1280px; margin: 0 auto; padding: 12px 16px;
+      }
+      header .brand { font-weight: 700; font-size: 1.1rem; }
+      .actions { display: flex; gap: 12px; }
+      button {
+        border: 1px solid var(--border); background: var(--panel); color: var(--text);
+        padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 600;
+        transition: all 0.2s ease; box-shadow: var(--shadow);
+      }
+      button:hover { border-color: var(--accent-info); transform: translateY(-1px); }
+      .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
+      h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+      h1 { font-size: 2rem; margin-bottom: 8px; }
+      h2 { font-size: 1.5rem; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+      h3 { font-size: 1.1rem; }
+      p { margin: 0; line-height: 1.6; color: var(--muted); }
+      .grid { display: grid; gap: 20px; }
+      .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+      .sim-grid { grid-template-columns: 1fr 2fr; }
+      @media (max-width: 900px) { .sim-grid { grid-template-columns: 1fr; } }
+      .kpi-card {
+        background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+        padding: 20px; display: flex; flex-direction: column; gap: 12px;
+      }
+      .kpi-card .header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .kpi-card .header h3 { font-size: 1.2rem; }
+      .kpi-card .comparison { display: flex; flex-direction: column; gap: 10px; font-size: 1.1rem; }
+      .kpi-card .item { display: flex; align-items: center; justify-content: space-between; font-weight: 600; }
+      .kpi-card .item span:first-child { display: flex; align-items: center; gap: 8px; }
+      .kpi-card .dot { width: 10px; height: 10px; border-radius: 50%; }
+      .dot.agil { background: var(--accent-agil); }
+      .dot.trad { background: var(--accent-trad); }
+      .kpi-card .impact {
+        margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--border);
+        font-size: 0.95rem; color: var(--muted);
+      }
+      .impact strong { color: var(--text); }
+      .form-group { display: flex; flex-direction: column; gap: 4px; }
+      .form-group label { font-weight: 600; font-size: 0.95rem; color: var(--muted); }
+      .form-group input {
+        width: 100%; padding: 10px; font-size: 1rem;
+        background: var(--bg); border: 1px solid var(--border);
+        border-radius: 8px; color: var(--text);
+      }
+      .results-panel { display: flex; flex-direction: column; gap: 16px; }
+      .result-card { background: var(--card); padding: 16px; border-radius: 12px; border: 1px solid var(--border); }
+      .result-card .value { font-size: 1.5rem; font-weight: 700; }
+      .result-card .value.agil { color: var(--accent-agil); }
+      .result-card .value.trad { color: var(--accent-trad); }
+      .result-card .diff { font-weight: 600; color: var(--accent-info); }
+      .chart-container { height: 250px; }
+      footer { text-align: center; padding: 32px 16px; color: var(--muted); font-size: 0.9rem; }
+      footer a { color: var(--accent-info); text-decoration: none; }
+      footer a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body data-theme="dark">
+    <header>
+      <div class="inner">
+        <div class="brand">Dashboard: Tradicional vs. Ágil</div>
+        <div class="actions">
+          <button id="toggleTheme">Mudar Tema</button>
+          <button onclick="window.print()">Imprimir / PDF</button>
+        </div>
       </div>
-      <div class="actions">
-        <button id="toggleTheme">Claro/Escuro</button>
-        <button onclick="window.print()">Imprimir / PDF</button>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <div class="container">
-    <section class="panel hero">
-      <h1>Comparativo com dados mundiais (DORA/Accelerate)</h1>
-      <p>
-		As métricas DORA é composta por quatro indicadores de desempenho usados mundialmente para medir quão bem uma equipe entrega software.
-      </p>
-    </section>
+    <main class="container grid" style="gap: 32px;">
+      <section class="panel">
+        <h1>Comparativo de Metodologias de Desenvolvimento</h1>
+        <p>Análise baseada nos indicadores DORA (DevOps Research and Assessment), o padrão-ouro da indústria para medir o desempenho de entrega de software.</p>
+      </section>
 
-    <section class="panel">
-      <div class="section-title">
-        <h2>KPIs DORA — valores representativos</h2>
-        <span class="legend">
-          <span class="pill"><span class="dotA"></span> Ágil — alto desempenho</span>
-          <span class="pill"><span class="dotT"></span> Tradicional — baixo desempenho</span>
-        </span>
-      </div>
-      <div class="kpis" id="kpiContainer"></div>
-      <div class="note" style="margin-top:8px">
-        Faixas (DORA): Lead time &lt;1d vs &gt;1 mês • Deploy sob demanda vs mensal+ • Falha 0–15% vs 46–60% • MTTR &lt;1d vs &gt;1 semana
-      </div>
-    </section>
-
-    <section class="grid">
-      <div class="col-6">
-        <div class="panel">
-          <div class="section-title">
-            <h2>Prazo e Operações</h2>
+      <section>
+        <h2>Indicadores Chave de Desempenho (DORA)</h2>
+        <div class="grid kpi-grid">
+          <div class="kpi-card">
+            <div class="header">
+              <h3>Lead Time para Mudanças</h3>
+            </div>
+            <p>Tempo entre o commit de um código e sua entrega em produção.</p>
+            <div class="comparison">
+              <div class="item">
+                <span><span class="dot agil"></span>Ágil</span>
+                <span>&lt; 1 dia</span>
+              </div>
+              <div class="item">
+                <span><span class="dot trad"></span>Tradicional</span>
+                <span>1-6 meses</span>
+              </div>
+            </div>
+            <div class="impact"><strong>Impacto:</strong> Mede a <strong>velocidade</strong>. Um lead time baixo permite entregar valor e obter feedback do cliente rapidamente.</div>
           </div>
-          <div class="chart-wrap">
-            <canvas id="chartPrazoOps"></canvas>
+
+          <div class="kpi-card">
+            <div class="header">
+              <h3>Frequência de Deploy</h3>
+            </div>
+            <p>Com que frequência a organização faz deploy para produção.</p>
+            <div class="comparison">
+              <div class="item">
+                <span><span class="dot agil"></span>Ágil</span>
+                <span>Sob demanda (diário)</span>
+              </div>
+              <div class="item">
+                <span><span class="dot trad"></span>Tradicional</span>
+                <span>Mensal / Trimestral</span>
+              </div>
+            </div>
+            <div class="impact"><strong>Impacto:</strong> Mede a <strong>capacidade de entrega</strong>. Alta frequência reduz o risco por deploy e acelera a inovação.</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="header">
+              <h3>Tempo de Restauração (MTTR)</h3>
+            </div>
+            <p>Quanto tempo leva para restaurar um serviço após um incidente em produção.</p>
+            <div class="comparison">
+              <div class="item">
+                <span><span class="dot agil"></span>Ágil</span>
+                <span>&lt; 1 hora</span>
+              </div>
+              <div class="item">
+                <span><span class="dot trad"></span>Tradicional</span>
+                <span>&gt; 1 semana</span>
+              </div>
+            </div>
+            <div class="impact"><strong>Impacto:</strong> Mede a <strong>estabilidade e resiliência</strong>. Um MTTR baixo minimiza o impacto negativo nos usuários e no negócio.</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="header">
+              <h3>Taxa de Falha de Mudanças</h3>
+            </div>
+            <p>Percentual de deploys que causam uma falha em produção.</p>
+            <div class="comparison">
+              <div class="item">
+                <span><span class="dot agil"></span>Ágil</span>
+                <span>0-15%</span>
+              </div>
+              <div class="item">
+                <span><span class="dot trad"></span>Tradicional</span>
+                <span>46-60%</span>
+              </div>
+            </div>
+            <div class="impact"><strong>Impacto:</strong> Mede a <strong>qualidade</strong>. Uma taxa baixa indica que o processo de desenvolvimento é confiável e não gera retrabalho.</div>
           </div>
         </div>
-      </div>
+        <div class="chart-container" style="margin-top: 24px;">
+          <canvas id="kpiChart"></canvas>
+        </div>
+      </section>
 
-      <div class="col-6">
-        <div class="panel">
-          <div class="section-title">
-            <h2>Legenda</h2>
+      <section class="panel">
+        <h2>Simulação de Projeto: Custo e Mudança de Escopo</h2>
+        <div class="grid sim-grid">
+          <div class="grid" style="gap: 16px; align-content: start;">
+            <h3>Premissas do Projeto</h3>
+            <div class="form-group">
+              <label for="numFeatures">Nº de Features/Requisitos</label>
+              <input type="number" id="numFeatures" value="50">
+            </div>
+            <div class="form-group">
+              <label for="costHour">Custo da Equipe (R$/hora)</label>
+              <input type="number" id="costHour" value="150">
+            </div>
+            <div class="form-group">
+              <label for="numChanges">Mudanças de Escopo (un)</label>
+              <input type="number" id="numChanges" value="5">
+            </div>
+            <p style="font-size: 0.9rem; margin-top: 8px;">* No modelo tradicional, cada mudança de escopo gera um custo de processo (análise, aprovação, etc.), estimado aqui em 40 horas. No ágil, a mudança é absorvida pela repriorização do backlog.</p>
           </div>
-          <ul class="note" style="margin:0 0 6px 18px">
-            <li>Deploy: frequência de entrega software em produção. Maior é melhor (mais fluxo de valor).</li>
-            <li>Lead time: Tempo leva desde um commit aprovado até essa mudança estar em produção. Menor é melhor (resposta rápida).</li>
-            <li>Taxa de falha de mudança: porcentagem de deploys que causam incidentes, rollback ou correções urgentes. Menor é melhor (estabilidade/qualidade).</li>
-			<li>MTTR (Mean Time To Restore): tempo médio para restaurar o serviço após uma falha em produção. Menor é melhor.</li>
-          </ul>
-        </div>
-		<div class="panel">
-          <div class="section-title">
-            <h2>Notas</h2>
+
+          <div class="results-panel">
+            <h3>Resultados Estimados</h3>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="result-card">
+                <h3>Custo Total do Projeto</h3>
+                <div id="costAgil" class="value agil">R$ 0</div>
+                <div id="costTrad" class="value trad">R$ 0</div>
+                <div id="costDiff" class="diff"></div>
+              </div>
+              <div class="result-card">
+                <h3>Prazo Total (horas)</h3>
+                <div id="timeAgil" class="value agil">0 h</div>
+                <div id="timeTrad" class="value trad">0 h</div>
+                <div id="timeDiff" class="diff"></div>
+              </div>
+              <div class="result-card" style="grid-column: span 2;">
+                <h3>Custo da Incerteza (Mudanças de Escopo)</h3>
+                <div id="changeCostAgil" class="value agil">R$ 0</div>
+                <div id="changeCostTrad" class="value trad">R$ 0</div>
+                <p style="font-size: 0.95rem;">Modelos ágeis são desenhados para absorver mudanças com baixo custo, enquanto modelos tradicionais as penalizam com processos caros de controle.</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="projectChart"></canvas>
+            </div>
           </div>
-          <ul class="note" style="margin:0 0 6px 18px">
-            <li>Lead time e MTTR: menor é melhor.</li>
-            <li>Deploys/mês: maior é melhor.</li>
-            <li>Falha de mudança: menor é melhor.</li>
-          </ul>
         </div>
-      </div>
+      </section>
+    </main>
 
-      <div class="col-12">
-        <div class="panel">
-          <h2 class="section-title" style="margin:0 0 8px">Fontes</h2>
-          <ul class="note" style="margin:0 0 0 18px">
-            <li>DORA Research: https://dora.dev/research/ • Métricas: https://dora.dev/metrics/</li>
-            <li>Livro Accelerate — Forsgren, Humble, Kim</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-  </div>
+    <footer>
+      Baseado nos benchmarks <a href="https://dora.dev" target="_blank" rel="noopener">DORA Research</a>. Desenvolvido para fins ilustrativos.
+    </footer>
 
-<script>
-  // Benchmarks (representativos dentro das faixas DORA)
-  const benchmarks = {
-    agil: { leadTimeDias: 0.5, deploysMes: 60, taxaFalhaMudancaPct: 10, mttrHoras: 12 },
-    tradicional: { leadTimeDias: 30, deploysMes: 1, taxaFalhaMudancaPct: 50, mttrHoras: 168 }
-  };
+    <script>
+      // --- CONFIGURAÇÃO E LÓGICA ---
 
-  // Alternância de tema
-  const isLight = () => document.body.getAttribute('data-theme') === 'light';
-  document.getElementById('toggleTheme').addEventListener('click', () => {
-    document.body.setAttribute('data-theme', isLight() ? 'dark' : 'light');
-    // Opcional: atualizar cores do gráfico ao trocar tema (mantemos simples aqui)
-  });
+      // Premissas base (representativas da indústria)
+      const PREMISSAS = {
+        horasPorFeatureTrad: 80, // Inclui burocracia, handoffs, etc.
+        horasPorFeatureAgil: 40,  // Foco em entrega de valor, menos desperdício.
+        horasPorMudancaTrad: 40 // Custo do processo de Change Request.
+      };
 
-  // Utilitário
-  function formatNumber(n, opts = {}) {
-    const {decimals=0, suffix=""} = opts;
-    const fmt = new Intl.NumberFormat('pt-BR', {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
-    return fmt.format(n) + suffix;
-  }
+      // Referências para os elementos do DOM
+      const elements = {
+        numFeatures: document.getElementById('numFeatures'),
+        costHour: document.getElementById('costHour'),
+        numChanges: document.getElementById('numChanges'),
+        costAgil: document.getElementById('costAgil'),
+        costTrad: document.getElementById('costTrad'),
+        costDiff: document.getElementById('costDiff'),
+        timeAgil: document.getElementById('timeAgil'),
+        timeTrad: document.getElementById('timeTrad'),
+        timeDiff: document.getElementById('timeDiff'),
+        changeCostAgil: document.getElementById('changeCostAgil'),
+        changeCostTrad: document.getElementById('changeCostTrad'),
+      };
 
-  // Render KPI cards
-  const kpis = [
-    { key: 'leadTimeDias', label: 'Lead time p/ mudança (dias)', lowerIsBetter: true, decimals: 1 },
-    { key: 'deploysMes', label: 'Frequência de deploy (mês)', lowerIsBetter: false, decimals: 0 },
-    { key: 'taxaFalhaMudancaPct', label: 'Falha de mudança (%)', lowerIsBetter: true, decimals: 0, suffix:'%' },
-    { key: 'mttrHoras', label: 'MTTR (horas)', lowerIsBetter: true, decimals: 0 }
-  ];
-  const kpiContainer = document.getElementById('kpiContainer');
+      let projectChart;
 
-  function improvementText(aValue, tValue, lowerIsBetter) {
-    const diff = lowerIsBetter ? (tValue - aValue) / tValue : (aValue - tValue) / tValue;
-    if (!isFinite(diff)) return '';
-    const pct = Math.round(diff * 100);
-    const cls = diff >= 0 ? 'ok' : 'bad';
-    const arrow = diff >= 0 ? '▲' : '▼';
-    return `<span class="${cls}">${arrow} ${Math.abs(pct)}%</span> vs Tradicional`;
-  }
+      // --- FUNÇÕES DE CÁLCULO E RENDERIZAÇÃO ---
 
-  function renderKPIs() {
-    kpiContainer.innerHTML = '';
-    kpis.forEach(k => {
-      const a = benchmarks.agil[k.key];
-      const t = benchmarks.tradicional[k.key];
-      const suffix = k.suffix || '';
-      const div = document.createElement('div');
-      div.className = 'kpi';
-      div.innerHTML = `
-        <h4>${k.label}</h4>
-        <div class="value">
-          <span class="pill"><span class="dotA"></span> ${formatNumber(a, {decimals:k.decimals})}${suffix}</span>
-          <span class="pill"><span class="dotT"></span> ${formatNumber(t, {decimals:k.decimals})}${suffix}</span>
-        </div>
-        <small>${improvementText(a, t, k.lowerIsBetter)}</small>
-      `;
-      kpiContainer.appendChild(div);
-    });
-  }
-  renderKPIs();
+      function formatCurrency(value) {
+        return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 });
+      }
 
-  // Gráfico com fontes maiores
-  let prazoOpsChart = null;
+      function formatNumber(value) {
+        return value.toLocaleString('pt-BR');
+      }
 
-  function makePrazoOpsChart() {
-    const ctx = document.getElementById('chartPrazoOps');
-    if (prazoOpsChart) prazoOpsChart.destroy();
+      function calculateSimulation() {
+        const numFeatures = Number(elements.numFeatures.value);
+        const costHour = Number(elements.costHour.value);
+        const numChanges = Number(elements.numChanges.value);
 
-    prazoOpsChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Lead time (dias)','Deploys/mês','Falha mudança (%)','MTTR (h)'],
-        datasets: [
-          {
-            label: 'Ágil (alto desempenho)',
-            data: [
-              benchmarks.agil.leadTimeDias,
-              benchmarks.agil.deploysMes,
-              benchmarks.agil.taxaFalhaMudancaPct,
-              benchmarks.agil.mttrHoras
-            ],
-            backgroundColor: 'rgba(56,189,248,0.75)',
-            borderRadius: 6
-          },
-          {
-            label: 'Tradicional (baixo desempenho)',
-            data: [
-              benchmarks.tradicional.leadTimeDias,
-              benchmarks.tradicional.deploysMes,
-              benchmarks.tradicional.taxaFalhaMudancaPct,
-              benchmarks.tradicional.mttrHoras
-            ],
-            backgroundColor: 'rgba(245,158,11,0.75)',
-            borderRadius: 6
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false, // respeita a altura da .chart-wrap
-        animation: false,
-        layout: { padding: { top: 2, right: 6, bottom: 0, left: 6 } },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              maxTicksLimit: 5,
-              color: getComputedStyle(document.body).getPropertyValue('--muted'),
-              font: { size: 14 } // fonte maior no eixo Y
+        // Cálculos de Prazo
+        const timeDevTrad = numFeatures * PREMISSAS.horasPorFeatureTrad;
+        const timeChangeTrad = numChanges * PREMISSAS.horasPorMudancaTrad;
+        const totalTimeTrad = timeDevTrad + timeChangeTrad;
+
+        const totalTimeAgil = numFeatures * PREMISSAS.horasPorFeatureAgil;
+
+        // Cálculos de Custo
+        const totalCostTrad = totalTimeTrad * costHour;
+        const totalCostAgil = totalTimeAgil * costHour;
+        const changeCostTrad = timeChangeTrad * costHour;
+
+        // Atualizar o DOM
+        elements.costAgil.textContent = formatCurrency(totalCostAgil);
+        elements.costTrad.textContent = formatCurrency(totalCostTrad);
+        const costDifference = totalCostTrad - totalCostAgil;
+        elements.costDiff.textContent = `Ágil economiza ${formatCurrency(costDifference)}`;
+        
+        elements.timeAgil.textContent = `${formatNumber(totalTimeAgil)} h`;
+        elements.timeTrad.textContent = `${formatNumber(totalTimeTrad)} h`;
+        const timeDifference = totalTimeTrad - totalTimeAgil;
+        elements.timeDiff.textContent = `Ágil é ${formatNumber(timeDifference)}h mais rápido`;
+
+        elements.changeCostAgil.textContent = formatCurrency(0);
+        elements.changeCostTrad.textContent = formatCurrency(changeCostTrad);
+
+        updateProjectChart({ totalCostAgil, totalCostTrad, totalTimeAgil, totalTimeTrad });
+      }
+
+      // --- GRÁFICOS (CHART.JS) ---
+
+      function getChartColors() {
+        const styles = getComputedStyle(document.body);
+        return {
+          agil: styles.getPropertyValue('--accent-agil').trim(),
+          trad: styles.getPropertyValue('--accent-trad').trim(),
+          text: styles.getPropertyValue('--muted').trim(),
+          grid: styles.getPropertyValue('--border').trim()
+        };
+      }
+      
+      function createKpiChart() {
+          const ctx = document.getElementById('kpiChart').getContext('2d');
+          const colors = getChartColors();
+          // Valores normalizados para melhor visualização (0 a 100)
+          // Lead Time (invertido: menor é melhor), Freq (maior é melhor), MTTR (invertido), CFR (invertido)
+          const dataAgil = [95, 90, 95, 90]; // Scores altos = bom
+          const dataTrad = [10, 20, 10, 50]; // Scores baixos = ruim
+          
+          new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: ['Velocidade (Lead Time)', 'Capacidade (Frequência)', 'Estabilidade (MTTR)', 'Qualidade (Taxa de Falha)'],
+                  datasets: [
+                      {
+                          label: 'Ágil (Score)',
+                          data: dataAgil,
+                          backgroundColor: colors.agil,
+                          borderRadius: 4,
+                      },
+                      {
+                          label: 'Tradicional (Score)',
+                          data: dataTrad,
+                          backgroundColor: colors.trad,
+                           borderRadius: 4,
+                      }
+                  ]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  indexAxis: 'y',
+                  scales: {
+                    x: {
+                      max: 100,
+                      ticks: { color: colors.text },
+                      grid: { color: colors.grid }
+                    },
+                    y: {
+                      ticks: { color: colors.text },
+                      grid: { display: false }
+                    }
+                  },
+                  plugins: {
+                      title: { display: true, text: 'Performance Relativa (Score de 0 a 100)', color: colors.text, font: { size: 14 } },
+                      legend: { position: 'bottom', labels: { color: colors.text } }
+                  }
+              }
+          });
+      }
+
+      function updateProjectChart(data) {
+        const colors = getChartColors();
+        const chartData = {
+          labels: ['Custo Total (R$)', 'Prazo Total (h)'],
+          datasets: [
+            {
+              label: 'Ágil',
+              data: [data.totalCostAgil, data.totalTimeAgil],
+              backgroundColor: colors.agil,
+              borderRadius: 4,
             },
-            grid: { color: 'rgba(148,163,184,.2)' }
-          },
-          x: {
-            grid: { display: false },
-            ticks: {
-              color: getComputedStyle(document.body).getPropertyValue('--muted'),
-              font: { size: 14 } // fonte maior no eixo X
+            {
+              label: 'Tradicional',
+              data: [data.totalCostTrad, data.totalTimeTrad],
+              backgroundColor: colors.trad,
+              borderRadius: 4,
             }
-          }
-        },
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: { color: getComputedStyle(document.body).getPropertyValue('--muted'), boxWidth: 16, font: { size: 14, weight: '600' } }
-          },
-          tooltip: {
-            mode: 'index', intersect: false,
-            titleFont: { size: 15, weight: '700' },
-            bodyFont: { size: 14 }
-          }
+          ]
+        };
+
+        if (projectChart) {
+          projectChart.data = chartData;
+          projectChart.options.scales.x.ticks.color = colors.text;
+          projectChart.options.scales.y.ticks.color = colors.text;
+          projectChart.options.scales.y.grid.color = colors.grid;
+          projectChart.options.plugins.legend.labels.color = colors.text;
+          projectChart.update();
+        } else {
+          const ctx = document.getElementById('projectChart').getContext('2d');
+          projectChart = new Chart(ctx, {
+            type: 'bar',
+            data: chartData,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: { beginAtZero: true, ticks: { color: colors.text }, grid: { color: colors.grid } },
+                x: { ticks: { color: colors.text }, grid: { display: false } }
+              },
+              plugins: {
+                legend: { position: 'bottom', labels: { color: colors.text } },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      let label = context.dataset.label || '';
+                      if (label) {
+                        label += ': ';
+                      }
+                      if (context.parsed.y !== null) {
+                        if (context.label === 'Custo Total (R$)') {
+                            label += formatCurrency(context.parsed.y);
+                        } else {
+                            label += `${formatNumber(context.parsed.y)} h`;
+                        }
+                      }
+                      return label;
+                    }
+                  }
+                }
+              }
+            }
+          });
         }
       }
-    });
-  }
 
-  // Monta e ajusta em resize
-  makePrazoOpsChart();
-  window.addEventListener('resize', () => { if (prazoOpsChart) prazoOpsChart.resize(); });
-</script>
-</body>
+      // --- INICIALIZAÇÃO E EVENTOS ---
+
+      document.getElementById('toggleTheme').addEventListener('click', () => {
+        const currentTheme = document.body.getAttribute('data-theme');
+        document.body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        // Redesenhar gráfico com as novas cores do tema
+        calculateSimulation(); 
+      });
+
+      // Adicionar listeners para recalcular ao mudar os inputs
+      Object.values(elements).forEach(el => {
+        if (el && (el.tagName === 'INPUT')) {
+          el.addEventListener('input', calculateSimulation);
+        }
+      });
+      
+      // Primeira execução
+      window.addEventListener('load', () => {
+          createKpiChart();
+          calculateSimulation();
+      });
+
+    </script>
+  </body>
 </html>
