@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Benchmarks globais — Ágil vs Tradicional (DORA)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    /* Controle de escala de fontes e altura de gráfico */
+    --scale-base: 1.15;          /* aumente para 1.25 ou 1.35 se quiser ainda maior */
+    --chart-h: 180px;            /* altura do gráfico; pode trocar para 200px ou 220px */
+    --bg: #0f172a; --panel: #111827; --muted: #94a3b8; --text: #e5e7eb;
+    --accent: #22c55e; --accent-2: #38bdf8; --warn: #f59e0b;
+    --card: #0b1220; --border: #1f2937; --shadow: 0 8px 16px rgba(0,0,0,.18);
+  }
+  [data-theme="light"]{
+    --bg: #f8fafc; --panel: #ffffff; --muted: #475569; --text: #0f172a;
+    --accent: #16a34a; --accent-2: #0284c7; --warn: #a16207; --card: #ffffff; --border: #e5e7eb;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: calc(16px * var(--scale-base)); }
+  body {
+    margin: 0; font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial;
+    background: var(--bg); color: var(--text);
+  }
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(2,6,23,.6); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border);
+  }
+  header .inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; max-width: 1100px; margin: 0 auto; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 56px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.05rem; }
+  .brand .dot { width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(45deg, var(--accent), var(--accent-2)); }
+  .actions { display: flex; gap: 10px; }
+  button {
+    appearance: none; border: 1px solid var(--border); color: var(--text); background: var(--panel);
+    padding: 10px 14px; border-radius: 12px; cursor: pointer; transition: .2s ease; box-shadow: var(--shadow);
+    font-size: 0.95rem; font-weight: 600;
+  }
+  button:hover { transform: translateY(-1px); }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); }
+  .hero h1 { margin: 0 0 8px; font-size: 1.5rem; }
+  .hero p { margin: 0; color: var(--muted); font-size: 1rem; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(12, 1fr); }
+  .col-12 { grid-column: span 12; }
+  .col-6 { grid-column: span 6; }
+  @media (max-width: 900px){ .col-6 { grid-column: span 12; } }
+
+  .legend { display: inline-flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border);
+    padding: 6px 10px; border-radius: 999px; font-size: 0.9rem; color: var(--muted); }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); font-size: 0.95rem; }
+  .dotA, .dotT { width: 12px; height: 12px; border-radius: 50%; }
+  .dotA { background: var(--accent-2); }
+  .dotT { background: var(--warn); }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 900px){ .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px; }
+  .kpi h4 { margin: 0 0 6px; font-size: 0.95rem; color: var(--muted); font-weight: 700; }
+  .kpi .value { font-size: 1.3rem; font-weight: 800; display: flex; gap: 8px; flex-wrap: wrap; }
+  .kpi small { color: var(--muted); font-size: 0.9rem; }
+
+  .note { font-size: 0.95rem; color: var(--muted); }
+  .section-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .section-title h2 { margin: 0; font-size: 1.15rem; }
+
+  /* Gráfico com altura fixa e fontes maiores */
+  .chart-wrap { height: var(--chart-h); width: 100%; }
+  .chart-wrap canvas { width: 100% !important; height: 100% !important; display: block; }
+
+  footer { margin-top: 26px; color: var(--muted); font-size: 0.95rem; }
+</style>
+</head>
+<body data-theme="dark">
+  <header>
+    <div class="inner">
+      <div class="brand">
+        <div class="dot"></div>
+        <div>Comparações globais — Ágil vs Tradicional</div>
+      </div>
+      <div class="actions">
+        <button id="toggleTheme">Claro/Escuro</button>
+        <button onclick="window.print()">Imprimir / PDF</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="panel hero">
+      <h1>Comparativo com dados mundiais (DORA/Accelerate)</h1>
+      <p>
+		As métricas DORA é composta por quatro indicadores de desempenho usados mundialmente para medir quão bem uma equipe entrega software.
+      </p>
+    </section>
+
+    <section class="panel">
+      <div class="section-title">
+        <h2>KPIs DORA — valores representativos</h2>
+        <span class="legend">
+          <span class="pill"><span class="dotA"></span> Ágil — alto desempenho</span>
+          <span class="pill"><span class="dotT"></span> Tradicional — baixo desempenho</span>
+        </span>
+      </div>
+      <div class="kpis" id="kpiContainer"></div>
+      <div class="note" style="margin-top:8px">
+        Faixas (DORA): Lead time &lt;1d vs &gt;1 mês • Deploy sob demanda vs mensal+ • Falha 0–15% vs 46–60% • MTTR &lt;1d vs &gt;1 semana
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="col-6">
+        <div class="panel">
+          <div class="section-title">
+            <h2>Prazo e Operações</h2>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chartPrazoOps"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="panel">
+          <div class="section-title">
+            <h2>Legenda</h2>
+          </div>
+          <ul class="note" style="margin:0 0 6px 18px">
+            <li>Deploy: frequência de entrega software em produção. Maior é melhor (mais fluxo de valor).</li>
+            <li>Lead time: Tempo leva desde um commit aprovado até essa mudança estar em produção. Menor é melhor (resposta rápida).</li>
+            <li>Taxa de falha de mudança: porcentagem de deploys que causam incidentes, rollback ou correções urgentes. Menor é melhor (estabilidade/qualidade).</li>
+			<li>MTTR (Mean Time To Restore): tempo médio para restaurar o serviço após uma falha em produção. Menor é melhor.</li>
+          </ul>
+        </div>
+		<div class="panel">
+          <div class="section-title">
+            <h2>Notas</h2>
+          </div>
+          <ul class="note" style="margin:0 0 6px 18px">
+            <li>Lead time e MTTR: menor é melhor.</li>
+            <li>Deploys/mês: maior é melhor.</li>
+            <li>Falha de mudança: menor é melhor.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="panel">
+          <h2 class="section-title" style="margin:0 0 8px">Fontes</h2>
+          <ul class="note" style="margin:0 0 0 18px">
+            <li>DORA Research: https://dora.dev/research/ • Métricas: https://dora.dev/metrics/</li>
+            <li>Livro Accelerate — Forsgren, Humble, Kim</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+  // Benchmarks (representativos dentro das faixas DORA)
+  const benchmarks = {
+    agil: { leadTimeDias: 0.5, deploysMes: 60, taxaFalhaMudancaPct: 10, mttrHoras: 12 },
+    tradicional: { leadTimeDias: 30, deploysMes: 1, taxaFalhaMudancaPct: 50, mttrHoras: 168 }
+  };
+
+  // Alternância de tema
+  const isLight = () => document.body.getAttribute('data-theme') === 'light';
+  document.getElementById('toggleTheme').addEventListener('click', () => {
+    document.body.setAttribute('data-theme', isLight() ? 'dark' : 'light');
+    // Opcional: atualizar cores do gráfico ao trocar tema (mantemos simples aqui)
+  });
+
+  // Utilitário
+  function formatNumber(n, opts = {}) {
+    const {decimals=0, suffix=""} = opts;
+    const fmt = new Intl.NumberFormat('pt-BR', {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
+    return fmt.format(n) + suffix;
+  }
+
+  // Render KPI cards
+  const kpis = [
+    { key: 'leadTimeDias', label: 'Lead time p/ mudança (dias)', lowerIsBetter: true, decimals: 1 },
+    { key: 'deploysMes', label: 'Frequência de deploy (mês)', lowerIsBetter: false, decimals: 0 },
+    { key: 'taxaFalhaMudancaPct', label: 'Falha de mudança (%)', lowerIsBetter: true, decimals: 0, suffix:'%' },
+    { key: 'mttrHoras', label: 'MTTR (horas)', lowerIsBetter: true, decimals: 0 }
+  ];
+  const kpiContainer = document.getElementById('kpiContainer');
+
+  function improvementText(aValue, tValue, lowerIsBetter) {
+    const diff = lowerIsBetter ? (tValue - aValue) / tValue : (aValue - tValue) / tValue;
+    if (!isFinite(diff)) return '';
+    const pct = Math.round(diff * 100);
+    const cls = diff >= 0 ? 'ok' : 'bad';
+    const arrow = diff >= 0 ? '▲' : '▼';
+    return `<span class="${cls}">${arrow} ${Math.abs(pct)}%</span> vs Tradicional`;
+  }
+
+  function renderKPIs() {
+    kpiContainer.innerHTML = '';
+    kpis.forEach(k => {
+      const a = benchmarks.agil[k.key];
+      const t = benchmarks.tradicional[k.key];
+      const suffix = k.suffix || '';
+      const div = document.createElement('div');
+      div.className = 'kpi';
+      div.innerHTML = `
+        <h4>${k.label}</h4>
+        <div class="value">
+          <span class="pill"><span class="dotA"></span> ${formatNumber(a, {decimals:k.decimals})}${suffix}</span>
+          <span class="pill"><span class="dotT"></span> ${formatNumber(t, {decimals:k.decimals})}${suffix}</span>
+        </div>
+        <small>${improvementText(a, t, k.lowerIsBetter)}</small>
+      `;
+      kpiContainer.appendChild(div);
+    });
+  }
+  renderKPIs();
+
+  // Gráfico com fontes maiores
+  let prazoOpsChart = null;
+
+  function makePrazoOpsChart() {
+    const ctx = document.getElementById('chartPrazoOps');
+    if (prazoOpsChart) prazoOpsChart.destroy();
+
+    prazoOpsChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Lead time (dias)','Deploys/mês','Falha mudança (%)','MTTR (h)'],
+        datasets: [
+          {
+            label: 'Ágil (alto desempenho)',
+            data: [
+              benchmarks.agil.leadTimeDias,
+              benchmarks.agil.deploysMes,
+              benchmarks.agil.taxaFalhaMudancaPct,
+              benchmarks.agil.mttrHoras
+            ],
+            backgroundColor: 'rgba(56,189,248,0.75)',
+            borderRadius: 6
+          },
+          {
+            label: 'Tradicional (baixo desempenho)',
+            data: [
+              benchmarks.tradicional.leadTimeDias,
+              benchmarks.tradicional.deploysMes,
+              benchmarks.tradicional.taxaFalhaMudancaPct,
+              benchmarks.tradicional.mttrHoras
+            ],
+            backgroundColor: 'rgba(245,158,11,0.75)',
+            borderRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false, // respeita a altura da .chart-wrap
+        animation: false,
+        layout: { padding: { top: 2, right: 6, bottom: 0, left: 6 } },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              maxTicksLimit: 5,
+              color: getComputedStyle(document.body).getPropertyValue('--muted'),
+              font: { size: 14 } // fonte maior no eixo Y
+            },
+            grid: { color: 'rgba(148,163,184,.2)' }
+          },
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: getComputedStyle(document.body).getPropertyValue('--muted'),
+              font: { size: 14 } // fonte maior no eixo X
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: getComputedStyle(document.body).getPropertyValue('--muted'), boxWidth: 16, font: { size: 14, weight: '600' } }
+          },
+          tooltip: {
+            mode: 'index', intersect: false,
+            titleFont: { size: 15, weight: '700' },
+            bodyFont: { size: 14 }
+          }
+        }
+      }
+    });
+  }
+
+  // Monta e ajusta em resize
+  makePrazoOpsChart();
+  window.addEventListener('resize', () => { if (prazoOpsChart) prazoOpsChart.resize(); });
+</script>
+</body>
+</html>
