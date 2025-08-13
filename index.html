@@ -1,4 +1,3 @@
-<!doctype html>
 <html lang="pt-br">
   <head>
     <meta charset="utf-8" />
@@ -203,23 +202,36 @@
       </section>
 
       <section class="panel">
-        <h2>Simulação de Projeto: Custo e Mudança de Escopo</h2>
+        <!--<h2>Simulação de Projeto: Custo e Mudança de Escopo</h2>-->
+		<h2>Módulo de diárias no Athenas - Comparação entre as metodologias Waterfall e Ágil</h2>
         <div class="grid sim-grid">
           <div class="grid" style="gap: 16px; align-content: start;">
-            <h3>Premissas do Projeto</h3>
+            <h3>Premissas da Simulação</h3>
             <div class="form-group">
               <label for="numFeatures">Nº de Features/Requisitos</label>
-              <input type="number" id="numFeatures" value="50">
+              <input type="number" id="numFeatures" value="258">
             </div>
             <div class="form-group">
               <label for="costHour">Custo da Equipe (R$/hora)</label>
-              <input type="number" id="costHour" value="150">
+              <input type="number" id="costHour" value="275">
             </div>
             <div class="form-group">
               <label for="numChanges">Mudanças de Escopo (un)</label>
               <input type="number" id="numChanges" value="5">
             </div>
-            <p style="font-size: 0.9rem; margin-top: 8px;">* No modelo tradicional, cada mudança de escopo gera um custo de processo (análise, aprovação, etc.), estimado aqui em 40 horas. No ágil, a mudança é absorvida pela repriorização do backlog.</p>
+            <div class="form-group">
+              <label for="horasFeatureAgil">Horas/Feature (Ágil)</label>
+              <input type="number" id="horasFeatureAgil" value="4">
+            </div>
+            <div class="form-group">
+              <label for="horasFeatureTrad">Horas/Feature (Tradicional)</label>
+              <input type="number" id="horasFeatureTrad" value="6">
+            </div>
+            <div class="form-group">
+              <label for="horasMudancaTrad">Custo Mudança (h) (Tradicional)</label>
+              <input type="number" id="horasMudancaTrad" value="16">
+            </div>
+            <p style="font-size: 0.9rem; margin-top: 8px;">* No ágil, a mudança de escopo é uma repriorização de backlog com custo próximo de zero. No tradicional, gera um processo de análise e aprovação.</p>
           </div>
 
           <div class="results-panel">
@@ -259,18 +271,14 @@
     <script>
       // --- CONFIGURAÇÃO E LÓGICA ---
 
-      // Premissas base (representativas da indústria)
-      const PREMISSAS = {
-        horasPorFeatureTrad: 80, // Inclui burocracia, handoffs, etc.
-        horasPorFeatureAgil: 40,  // Foco em entrega de valor, menos desperdício.
-        horasPorMudancaTrad: 40 // Custo do processo de Change Request.
-      };
-
       // Referências para os elementos do DOM
       const elements = {
         numFeatures: document.getElementById('numFeatures'),
         costHour: document.getElementById('costHour'),
         numChanges: document.getElementById('numChanges'),
+        horasFeatureAgil: document.getElementById('horasFeatureAgil'),
+        horasFeatureTrad: document.getElementById('horasFeatureTrad'),
+        horasMudancaTrad: document.getElementById('horasMudancaTrad'),
         costAgil: document.getElementById('costAgil'),
         costTrad: document.getElementById('costTrad'),
         costDiff: document.getElementById('costDiff'),
@@ -281,7 +289,7 @@
         changeCostTrad: document.getElementById('changeCostTrad'),
       };
 
-      let projectChart;
+      let kpiChart, projectChart;
 
       // --- FUNÇÕES DE CÁLCULO E RENDERIZAÇÃO ---
 
@@ -297,13 +305,16 @@
         const numFeatures = Number(elements.numFeatures.value);
         const costHour = Number(elements.costHour.value);
         const numChanges = Number(elements.numChanges.value);
+        const horasFeatureAgil = Number(elements.horasFeatureAgil.value);
+        const horasFeatureTrad = Number(elements.horasFeatureTrad.value);
+        const horasMudancaTrad = Number(elements.horasMudancaTrad.value);
 
         // Cálculos de Prazo
-        const timeDevTrad = numFeatures * PREMISSAS.horasPorFeatureTrad;
-        const timeChangeTrad = numChanges * PREMISSAS.horasPorMudancaTrad;
+        const timeDevTrad = numFeatures * horasFeatureTrad;
+        const timeChangeTrad = numChanges * horasMudancaTrad;
         const totalTimeTrad = timeDevTrad + timeChangeTrad;
 
-        const totalTimeAgil = numFeatures * PREMISSAS.horasPorFeatureAgil;
+        const totalTimeAgil = numFeatures * horasFeatureAgil;
 
         // Cálculos de Custo
         const totalCostTrad = totalTimeTrad * costHour;
@@ -339,57 +350,38 @@
         };
       }
       
-      function createKpiChart() {
-          const ctx = document.getElementById('kpiChart').getContext('2d');
+      function createOrUpdateKpiChart() {
           const colors = getChartColors();
-          // Valores normalizados para melhor visualização (0 a 100)
-          // Lead Time (invertido: menor é melhor), Freq (maior é melhor), MTTR (invertido), CFR (invertido)
-          const dataAgil = [95, 90, 95, 90]; // Scores altos = bom
-          const dataTrad = [10, 20, 10, 50]; // Scores baixos = ruim
-          
-          new Chart(ctx, {
-              type: 'bar',
-              data: {
-                  labels: ['Velocidade (Lead Time)', 'Capacidade (Frequência)', 'Estabilidade (MTTR)', 'Qualidade (Taxa de Falha)'],
-                  datasets: [
-                      {
-                          label: 'Ágil (Score)',
-                          data: dataAgil,
-                          backgroundColor: colors.agil,
-                          borderRadius: 4,
-                      },
-                      {
-                          label: 'Tradicional (Score)',
-                          data: dataTrad,
-                          backgroundColor: colors.trad,
-                           borderRadius: 4,
-                      }
-                  ]
+          const data = {
+              labels: ['Velocidade (Lead Time)', 'Capacidade (Frequência)', 'Estabilidade (MTTR)', 'Qualidade (Taxa de Falha)'],
+              datasets: [
+                  { label: 'Ágil (Score)', data: [95, 90, 95, 90], backgroundColor: colors.agil, borderRadius: 4 },
+                  { label: 'Tradicional (Score)', data: [10, 20, 10, 50], backgroundColor: colors.trad, borderRadius: 4 }
+              ]
+          };
+          const options = {
+              responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+              scales: {
+                  x: { max: 100, ticks: { color: colors.text }, grid: { color: colors.grid } },
+                  y: { ticks: { color: colors.text }, grid: { display: false } }
               },
-              options: {
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  indexAxis: 'y',
-                  scales: {
-                    x: {
-                      max: 100,
-                      ticks: { color: colors.text },
-                      grid: { color: colors.grid }
-                    },
-                    y: {
-                      ticks: { color: colors.text },
-                      grid: { display: false }
-                    }
-                  },
-                  plugins: {
-                      title: { display: true, text: 'Performance Relativa (Score de 0 a 100)', color: colors.text, font: { size: 14 } },
-                      legend: { position: 'bottom', labels: { color: colors.text } }
-                  }
+              plugins: {
+                  title: { display: true, text: 'Performance Relativa (Score de 0 a 100)', color: colors.text, font: { size: 14 } },
+                  legend: { position: 'bottom', labels: { color: colors.text } }
               }
-          });
+          };
+
+          if (kpiChart) {
+              kpiChart.data = data;
+              kpiChart.options = options;
+              kpiChart.update();
+          } else {
+              const ctx = document.getElementById('kpiChart').getContext('2d');
+              kpiChart = new Chart(ctx, { type: 'bar', data, options });
+          }
       }
 
-      function updateProjectChart(data) {
+      function createOrUpdateProjectChart(data) {
         const colors = getChartColors();
         const chartData = {
           labels: ['Custo Total (R$)', 'Prazo Total (h)'],
@@ -408,35 +400,19 @@
             }
           ]
         };
-
-        if (projectChart) {
-          projectChart.data = chartData;
-          projectChart.options.scales.x.ticks.color = colors.text;
-          projectChart.options.scales.y.ticks.color = colors.text;
-          projectChart.options.scales.y.grid.color = colors.grid;
-          projectChart.options.plugins.legend.labels.color = colors.text;
-          projectChart.update();
-        } else {
-          const ctx = document.getElementById('projectChart').getContext('2d');
-          projectChart = new Chart(ctx, {
-            type: 'bar',
-            data: chartData,
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
+        const options = {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
                 y: { beginAtZero: true, ticks: { color: colors.text }, grid: { color: colors.grid } },
                 x: { ticks: { color: colors.text }, grid: { display: false } }
-              },
-              plugins: {
+            },
+            plugins: {
                 legend: { position: 'bottom', labels: { color: colors.text } },
                 tooltip: {
                   callbacks: {
                     label: function(context) {
                       let label = context.dataset.label || '';
-                      if (label) {
-                        label += ': ';
-                      }
+                      if (label) { label += ': '; }
                       if (context.parsed.y !== null) {
                         if (context.label === 'Custo Total (R$)') {
                             label += formatCurrency(context.parsed.y);
@@ -448,10 +424,21 @@
                     }
                   }
                 }
-              }
             }
-          });
+        };
+
+        if (projectChart) {
+          projectChart.data = chartData;
+          projectChart.options = options;
+          projectChart.update();
+        } else {
+          const ctx = document.getElementById('projectChart').getContext('2d');
+          projectChart = new Chart(ctx, { type: 'bar', data: chartData, options });
         }
+      }
+      
+      function updateProjectChart(data) {
+        createOrUpdateProjectChart(data);
       }
 
       // --- INICIALIZAÇÃO E EVENTOS ---
@@ -459,8 +446,11 @@
       document.getElementById('toggleTheme').addEventListener('click', () => {
         const currentTheme = document.body.getAttribute('data-theme');
         document.body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
-        // Redesenhar gráfico com as novas cores do tema
-        calculateSimulation(); 
+        // Espera um pouco para a transição de CSS aplicar e então redesenha os gráficos
+        setTimeout(() => {
+            createOrUpdateKpiChart();
+            calculateSimulation();
+        }, 50);
       });
 
       // Adicionar listeners para recalcular ao mudar os inputs
@@ -472,7 +462,7 @@
       
       // Primeira execução
       window.addEventListener('load', () => {
-          createKpiChart();
+          createOrUpdateKpiChart();
           calculateSimulation();
       });
 
