@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard: Tradicional vs. Ágil (Indicadores DORA)</title>
+    <title>Comparativo entre as metodologias de desenvolvimento Tradicional e Ágil (Indicadores DORA)</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <style>
@@ -108,7 +108,7 @@
   <body data-theme="dark">
     <header>
       <div class="inner">
-        <div class="brand">Dashboard: Tradicional vs. Ágil</div>
+        <div class="brand">Comparativo entre as metodologias de desenvolvimento Tradicional e Ágil (Indicadores DORA)</div>
         <div class="actions">
           <button id="toggleTheme">Mudar Tema</button>
           <button onclick="window.print()">Imprimir / PDF</button>
@@ -117,7 +117,13 @@
     </header>
 
     <main class="container grid" style="gap: 32px;">
-		<section class="panel">
+	  <section class="panel">
+        <h1>Comparativo de Metodologias de Desenvolvimento</h1>
+        <p>Análise baseada nos indicadores DORA (DevOps Research and Assessment), o padrão-ouro da indústria para medir o desempenho de entrega de software.</p>
+		<p>O DORA é o maior e mais antigo programa de pesquisa do gênero, que busca compreender as capacidades que impulsionam a entrega de software e o desempenho das operações. O DORA ajuda as equipes a aplicar essas capacidades, resultando em um melhor desempenho organizacional.</p>
+      </section>
+	  
+	  <section class="panel">
         <!--<h2>Simulação de Projeto: Custo e Mudança de Escopo</h2>-->
 		<h2>Módulo de diárias no Athenas - Comparação entre as metodologias Waterfall e Ágil</h2>
         <div class="grid sim-grid">
@@ -177,11 +183,6 @@
             </div>
           </div>
         </div>
-      </section>
-	
-      <section class="panel">
-        <h1>Comparativo de Metodologias de Desenvolvimento</h1>
-        <p>Análise baseada nos indicadores DORA (DevOps Research and Assessment), o padrão-ouro da indústria para medir o desempenho de entrega de software.</p>
       </section>
 
       <section>
@@ -266,7 +267,7 @@
     </main>
 
     <footer>
-      Baseado nos benchmarks <a href="https://dora.dev" target="_blank" rel="noopener">DORA Research</a>. Desenvolvido para fins ilustrativos.
+      Baseado nos benchmarks <a href="https://dora.dev" target="_blank" rel="noopener">DORA Research</a>. 
     </footer>
 
     <script>
