@@ -1,3 +1,4 @@
+<!doctype html>
 <html lang="pt-br">
   <head>
     <meta charset="utf-8" />
@@ -116,6 +117,68 @@
     </header>
 
     <main class="container grid" style="gap: 32px;">
+		<section class="panel">
+        <!--<h2>Simulação de Projeto: Custo e Mudança de Escopo</h2>-->
+		<h2>Módulo de diárias no Athenas - Comparação entre as metodologias Waterfall e Ágil</h2>
+        <div class="grid sim-grid">
+          <div class="grid" style="gap: 16px; align-content: start;">
+            <h3>Premissas da Simulação</h3>
+            <div class="form-group">
+              <label for="numFeatures">Nº de Features/Requisitos</label>
+              <input type="number" id="numFeatures" value="258">
+            </div>
+            <div class="form-group">
+              <label for="costHour">Custo da Equipe (R$/hora)</label>
+              <input type="number" id="costHour" value="275">
+            </div>
+            <div class="form-group">
+              <label for="numChanges">Mudanças de Escopo (un)</label>
+              <input type="number" id="numChanges" value="5">
+            </div>
+            <div class="form-group">
+              <label for="horasFeatureAgil">Horas/Feature (Ágil)</label>
+              <input type="number" id="horasFeatureAgil" value="4">
+            </div>
+            <div class="form-group">
+              <label for="horasFeatureTrad">Horas/Feature (Tradicional)</label>
+              <input type="number" id="horasFeatureTrad" value="6">
+            </div>
+            <div class="form-group">
+              <label for="horasMudancaTrad">Custo Mudança (h) (Tradicional)</label>
+              <input type="number" id="horasMudancaTrad" value="16">
+            </div>
+            <p style="font-size: 0.9rem; margin-top: 8px;">* No ágil, a mudança de escopo é uma repriorização de backlog com custo próximo de zero. No tradicional, gera um processo de análise e aprovação.</p>
+          </div>
+
+          <div class="results-panel">
+            <h3>Resultados Estimados</h3>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div class="result-card">
+                <h3>Custo Total do Projeto</h3>
+                <div id="costAgil" class="value agil">R$ 0</div>
+                <div id="costTrad" class="value trad">R$ 0</div>
+                <div id="costDiff" class="diff"></div>
+              </div>
+              <div class="result-card">
+                <h3>Prazo Total (horas)</h3>
+                <div id="timeAgil" class="value agil">0 h</div>
+                <div id="timeTrad" class="value trad">0 h</div>
+                <div id="timeDiff" class="diff"></div>
+              </div>
+              <div class="result-card" style="grid-column: span 2;">
+                <h3>Custo da Incerteza (Mudanças de Escopo)</h3>
+                <div id="changeCostAgil" class="value agil">R$ 0</div>
+                <div id="changeCostTrad" class="value trad">R$ 0</div>
+                <p style="font-size: 0.95rem;">Modelos ágeis são desenhados para absorver mudanças com baixo custo, enquanto modelos tradicionais as penalizam com processos caros de controle.</p>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="projectChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+	
       <section class="panel">
         <h1>Comparativo de Metodologias de Desenvolvimento</h1>
         <p>Análise baseada nos indicadores DORA (DevOps Research and Assessment), o padrão-ouro da indústria para medir o desempenho de entrega de software.</p>
@@ -198,68 +261,6 @@
         </div>
         <div class="chart-container" style="margin-top: 24px;">
           <canvas id="kpiChart"></canvas>
-        </div>
-      </section>
-
-      <section class="panel">
-        <!--<h2>Simulação de Projeto: Custo e Mudança de Escopo</h2>-->
-		<h2>Módulo de diárias no Athenas - Comparação entre as metodologias Waterfall e Ágil</h2>
-        <div class="grid sim-grid">
-          <div class="grid" style="gap: 16px; align-content: start;">
-            <h3>Premissas da Simulação</h3>
-            <div class="form-group">
-              <label for="numFeatures">Nº de Features/Requisitos</label>
-              <input type="number" id="numFeatures" value="258">
-            </div>
-            <div class="form-group">
-              <label for="costHour">Custo da Equipe (R$/hora)</label>
-              <input type="number" id="costHour" value="275">
-            </div>
-            <div class="form-group">
-              <label for="numChanges">Mudanças de Escopo (un)</label>
-              <input type="number" id="numChanges" value="5">
-            </div>
-            <div class="form-group">
-              <label for="horasFeatureAgil">Horas/Feature (Ágil)</label>
-              <input type="number" id="horasFeatureAgil" value="4">
-            </div>
-            <div class="form-group">
-              <label for="horasFeatureTrad">Horas/Feature (Tradicional)</label>
-              <input type="number" id="horasFeatureTrad" value="6">
-            </div>
-            <div class="form-group">
-              <label for="horasMudancaTrad">Custo Mudança (h) (Tradicional)</label>
-              <input type="number" id="horasMudancaTrad" value="16">
-            </div>
-            <p style="font-size: 0.9rem; margin-top: 8px;">* No ágil, a mudança de escopo é uma repriorização de backlog com custo próximo de zero. No tradicional, gera um processo de análise e aprovação.</p>
-          </div>
-
-          <div class="results-panel">
-            <h3>Resultados Estimados</h3>
-            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
-              <div class="result-card">
-                <h3>Custo Total do Projeto</h3>
-                <div id="costAgil" class="value agil">R$ 0</div>
-                <div id="costTrad" class="value trad">R$ 0</div>
-                <div id="costDiff" class="diff"></div>
-              </div>
-              <div class="result-card">
-                <h3>Prazo Total (horas)</h3>
-                <div id="timeAgil" class="value agil">0 h</div>
-                <div id="timeTrad" class="value trad">0 h</div>
-                <div id="timeDiff" class="diff"></div>
-              </div>
-              <div class="result-card" style="grid-column: span 2;">
-                <h3>Custo da Incerteza (Mudanças de Escopo)</h3>
-                <div id="changeCostAgil" class="value agil">R$ 0</div>
-                <div id="changeCostTrad" class="value trad">R$ 0</div>
-                <p style="font-size: 0.95rem;">Modelos ágeis são desenhados para absorver mudanças com baixo custo, enquanto modelos tradicionais as penalizam com processos caros de controle.</p>
-              </div>
-            </div>
-            <div class="chart-container">
-              <canvas id="projectChart"></canvas>
-            </div>
-          </div>
         </div>
       </section>
     </main>
